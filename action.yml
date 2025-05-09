@@ -9,15 +9,19 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
+  iansinput:
     description: Your input description here
     required: true
     default: '1000'
+  MODEL_VERSION:
+    description: AI model version
+    required: true
+
 
 # Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
+# outputs:
+#   time:
+#     description: Your output description here
 
 runs:
   using: node22

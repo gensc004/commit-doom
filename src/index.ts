@@ -1,5 +1,7 @@
 import * as core from "@actions/core";
 
 async function main() {
-	core.getInput("");
+	const modelVersion = core.getInput("MODEL_VERSION");
 }
+
+main();
