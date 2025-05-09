@@ -11,7 +11,6 @@ branding:
 inputs:
   iansinput:
     description: Your input description here
-    required: true
     default: '1000'
   MODEL_VERSION:
     description: AI model version
@@ -24,5 +23,5 @@ inputs:
 #     description: Your output description here
 
 runs:
-  using: node22
+  using: node20
   main: dist/index.js
