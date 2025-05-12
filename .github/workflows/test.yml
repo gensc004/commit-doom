@@ -14,5 +14,5 @@ jobs:
 
       - name: Run the custom action
         uses: ./
-        with:
-          MODEL_VERSION: "2000"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

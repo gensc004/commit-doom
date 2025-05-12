@@ -9,9 +9,9 @@ branding:
 
 # Define your inputs here.
 inputs:
-  MODEL_VERSION:
-    description: "Model Version"
-    default: '1000'
+  GITHUB_TOKEN:
+    description: "Github token used to commit changes to the doom game state"
+    required: true
 
 
 # Define your outputs here.

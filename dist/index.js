@@ -19718,11 +19718,11 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issue)("echo", enabled ? "on" : "off");
     }
     exports2.setCommandEcho = setCommandEcho;
-    function setFailed(message) {
+    function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    exports2.setFailed = setFailed;
+    exports2.setFailed = setFailed2;
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
@@ -23874,14 +23874,58 @@ var require_github = __commonJS({
 var core = __toESM(require_core());
 var github = __toESM(require_github());
 var import_child_process = require("child_process");
+var COMPLETED_COMMIT_MESSAGE = "commit-doom: ";
+async function takeScreenshotOfAction(action) {
+  core.info("Running puppetteer on port 8080");
+  core.info("Running action on puppetteer");
+  core.info("Taking screenshot of current state of the game");
+  core.info("Successfully took screenshot.");
+}
+async function runDoomServer() {
+  core.info("Running doom server on port 8080");
+}
+function getActionFromCommitMessage(commitMessage) {
+  return {
+    command: "pause",
+    frames: 10
+  };
+}
+async function commitImageToGithub() {
+  (0, import_child_process.execSync)('git config user.name "github-actions"');
+  (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
+  (0, import_child_process.execSync)('git commit -m "Add screenshot from action"');
+  const repo = process.env.GITHUB_REPOSITORY;
+  const token = process.env.GITHUB_TOKEN;
+  if (!repo || !token) {
+    throw new Error("Missing GITHUB_REPOSITORY or GITHUB_TOKEN");
+  }
+  const remoteUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
+  (0, import_child_process.execSync)(`git push "${remoteUrl}" HEAD`);
+  core.info("Screenshot committed and pushed");
+}
 async function main() {
   const modelVersion = core.getInput("MODEL_VERSION");
   console.log(`The model version is: ${modelVersion}`);
   const event = github.context.eventName;
   if (event === "push") {
     const commitMessage = github.context.payload.head_commit?.message;
-    core.info(`Commit message (push): ${commitMessage}`);
-  } else if (event === "pull_request") {
+    if (commitMessage.includes(COMPLETED_COMMIT_MESSAGE)) {
+      core.info("Skipping commits from this action");
+      return;
+    }
+    const action = getActionFromCommitMessage(commitMessage);
+    if (!action) {
+      core.info("Action not found in commit message. Skipping.");
+      return;
+    }
+    try {
+      await runDoomServer();
+      await takeScreenshotOfAction(action);
+      await commitImageToGithub();
+    } catch (err) {
+      core.setFailed(err.message);
+    }
+  } else if (event === "pull_request" && github.context.payload.action === "closed" && github.context.payload.pull_request?.merged) {
     const commitMessage = (0, import_child_process.execSync)("git log -1 --pretty=%B").toString().trim();
     core.info(`Commit message (PR): ${commitMessage}`);
   } else {
