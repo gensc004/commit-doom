@@ -1,6 +1,10 @@
 import * as core from "@actions/core";
 import * as github from '@actions/github';
 import { execSync } from 'child_process';
+import { spawn } from "child_process";
+import path, { join } from "path";
+// import { chromium } from 'playwright';
+import { mkdirSync } from 'fs';
 
 const COMPLETED_COMMIT_MESSAGE = 'commit-doom:'
 
@@ -41,17 +45,45 @@ type Action = {
 // })();
 
 async function takeScreenshotOfAction (action: Action) {
-    core.info('Running puppetteer on port 8080');
+    // const url = 'http://localhost:8080';
+    // const screenshotPath = join(__dirname, 'screenshots', 'latest.png');
 
-    core.info('Running action on puppetteer');
+    // // Ensure directory exists
+    // mkdirSync(join(__dirname, 'screenshots'), { recursive: true });
 
-    core.info('Taking screenshot of current state of the game');
+    // const browser = await chromium.launch();
+    // const page = await browser.newPage();
 
-    core.info('Successfully took screenshot.')
+    // core.info('Running playwright against doom');
+    // await page.goto(url, { waitUntil: 'networkidle' });
+
+
+    // // TODO: Run commands
+    // core.info('Running action on puppetteer');
+
+    // console.log(`Taking screenshot and saving to ${screenshotPath}`);
+    // await page.screenshot({ path: screenshotPath, fullPage: true });
+
+    // await browser.close();
+
+    // core.info('Successfully took screenshot.')
 }
 
 async function runDoomServer() {
+    const publicDir = path.join(__dirname, "public");
+
+    const server = spawn(
+        "npx",
+        ["http-server", publicDir, "-p", "8080", "--silent"],
+        {
+            stdio: "inherit",
+            shell: true,
+        }
+    );
+
     core.info('Running doom server on port 8080');
+
+    return server
 }
 
 function getActionFromCommitMessage (commitMessage: string): Action | null {
@@ -68,7 +100,7 @@ async function commitImageToGithub (action: Action) {
     execSync('git config user.email "github-actions@github.com"');
 
     // Add and commit the screenshot
-    // execSync('git add screenshots');
+    execSync('git add screenshots');
     execSync(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
 
     // Push using GITHUB_TOKEN
@@ -86,8 +118,6 @@ async function commitImageToGithub (action: Action) {
 }
 
 async function main() {
-	const modelVersion = core.getInput("MODEL_VERSION");
-	console.log(`The model version is: ${modelVersion}`);
     const event = github.context.eventName;
 
     if (event === 'push') {
@@ -107,14 +137,18 @@ async function main() {
             return;
         }
 
+        let doomServer;
+
         // Run doom, run the action, take screenshot
         try {
-            await runDoomServer();
+            doomServer = await runDoomServer();
             await takeScreenshotOfAction(action);
             await commitImageToGithub(action);
         } catch(err) {
             core.setFailed((err as Error).message);
         }
+
+        doomServer?.kill();
     } else if (event === 'pull_request' && github.context.payload.action === 'closed' && github.context.payload.pull_request?.merged) {
         const commitMessage = execSync('git log -1 --pretty=%B').toString().trim();
         core.info(`Commit message (PR): ${commitMessage}`);
