@@ -23893,7 +23893,7 @@ function getActionFromCommitMessage(commitMessage) {
 async function commitImageToGithub(action) {
   (0, import_child_process.execSync)('git config user.name "github-actions"');
   (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
-  (0, import_child_process.execSync)(`git commit -m ${COMPLETED_COMMIT_MESSAGE} ${JSON.stringify(action)}`);
+  (0, import_child_process.execSync)(`git commit -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
   const repo = process.env.GITHUB_REPOSITORY;
   const token = process.env.GITHUB_TOKEN;
   if (!repo || !token) {

@@ -69,7 +69,7 @@ async function commitImageToGithub (action: Action) {
 
     // Add and commit the screenshot
     // execSync('git add screenshots');
-    execSync(`git commit -m ${COMPLETED_COMMIT_MESSAGE} ${JSON.stringify(action)}`);
+    execSync(`git commit -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
 
     // Push using GITHUB_TOKEN
     const repo = process.env.GITHUB_REPOSITORY;
