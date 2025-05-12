@@ -23890,10 +23890,10 @@ function getActionFromCommitMessage(commitMessage) {
     frames: 10
   };
 }
-async function commitImageToGithub() {
+async function commitImageToGithub(action) {
   (0, import_child_process.execSync)('git config user.name "github-actions"');
   (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
-  (0, import_child_process.execSync)('git commit -m "Add screenshot from action"');
+  (0, import_child_process.execSync)(`git commit -m ${COMPLETED_COMMIT_MESSAGE} ${JSON.stringify(action)}`);
   const repo = process.env.GITHUB_REPOSITORY;
   const token = process.env.GITHUB_TOKEN;
   if (!repo || !token) {
@@ -23921,7 +23921,7 @@ async function main() {
     try {
       await runDoomServer();
       await takeScreenshotOfAction(action);
-      await commitImageToGithub();
+      await commitImageToGithub(action);
     } catch (err) {
       core.setFailed(err.message);
     }

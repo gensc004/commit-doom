@@ -62,14 +62,14 @@ function getActionFromCommitMessage (commitMessage: string): Action | null {
     }
 }
 
-async function commitImageToGithub () {
+async function commitImageToGithub (action: Action) {
     // Set up Git
     execSync('git config user.name "github-actions"');
     execSync('git config user.email "github-actions@github.com"');
 
     // Add and commit the screenshot
     // execSync('git add screenshots');
-    execSync('git commit -m "Add screenshot from action"');
+    execSync(`git commit -m ${COMPLETED_COMMIT_MESSAGE} ${JSON.stringify(action)}`);
 
     // Push using GITHUB_TOKEN
     const repo = process.env.GITHUB_REPOSITORY;
@@ -111,7 +111,7 @@ async function main() {
         try {
             await runDoomServer();
             await takeScreenshotOfAction(action);
-            await commitImageToGithub();
+            await commitImageToGithub(action);
         } catch(err) {
             core.setFailed((err as Error).message);
         }
