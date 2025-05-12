@@ -23874,7 +23874,7 @@ var require_github = __commonJS({
 var core = __toESM(require_core());
 var github = __toESM(require_github());
 var import_child_process = require("child_process");
-var COMPLETED_COMMIT_MESSAGE = "commit-doom: ";
+var COMPLETED_COMMIT_MESSAGE = "commit-doom:";
 async function takeScreenshotOfAction(action) {
   core.info("Running puppetteer on port 8080");
   core.info("Running action on puppetteer");
@@ -23893,7 +23893,7 @@ function getActionFromCommitMessage(commitMessage) {
 async function commitImageToGithub(action) {
   (0, import_child_process.execSync)('git config user.name "github-actions"');
   (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
-  (0, import_child_process.execSync)(`git commit -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
+  (0, import_child_process.execSync)(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
   const repo = process.env.GITHUB_REPOSITORY;
   const token = process.env.GITHUB_TOKEN;
   if (!repo || !token) {

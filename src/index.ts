@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 import * as github from '@actions/github';
 import { execSync } from 'child_process';
 
-const COMPLETED_COMMIT_MESSAGE = 'commit-doom: '
+const COMPLETED_COMMIT_MESSAGE = 'commit-doom:'
 
 type Action = {
     command: string,
@@ -69,7 +69,7 @@ async function commitImageToGithub (action: Action) {
 
     // Add and commit the screenshot
     // execSync('git add screenshots');
-    execSync(`git commit -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
+    execSync(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
 
     // Push using GITHUB_TOKEN
     const repo = process.env.GITHUB_REPOSITORY;
