@@ -55,7 +55,7 @@ async function takeScreenshotOfAction (action: Action) {
     const page = await browser.newPage();
 
     core.info('Running playwright against doom');
-    await page.goto(url, { waitUntil: 'networkidle' });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
 
     // TODO: Run commands
