@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import { execSync } from 'child_process';
 import { spawn } from "child_process";
 import path, { join } from "path";
-// import { chromium } from 'playwright';
+import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
 
 const COMPLETED_COMMIT_MESSAGE = 'commit-doom:'
@@ -45,28 +45,28 @@ type Action = {
 // })();
 
 async function takeScreenshotOfAction (action: Action) {
-    // const url = 'http://localhost:8080';
-    // const screenshotPath = join(__dirname, 'screenshots', 'latest.png');
+    const url = 'http://localhost:8080';
+    const screenshotPath = join(__dirname, 'screenshots', 'latest.png');
 
-    // // Ensure directory exists
-    // mkdirSync(join(__dirname, 'screenshots'), { recursive: true });
+    // Ensure directory exists
+    mkdirSync(join(__dirname, 'screenshots'), { recursive: true });
 
-    // const browser = await chromium.launch();
-    // const page = await browser.newPage();
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
 
-    // core.info('Running playwright against doom');
-    // await page.goto(url, { waitUntil: 'networkidle' });
+    core.info('Running playwright against doom');
+    await page.goto(url, { waitUntil: 'networkidle' });
 
 
-    // // TODO: Run commands
-    // core.info('Running action on puppetteer');
+    // TODO: Run commands
+    core.info('Running action on puppetteer');
 
-    // console.log(`Taking screenshot and saving to ${screenshotPath}`);
-    // await page.screenshot({ path: screenshotPath, fullPage: true });
+    console.log(`Taking screenshot and saving to ${screenshotPath}`);
+    await page.screenshot({ path: screenshotPath, fullPage: true });
 
-    // await browser.close();
+    await browser.close();
 
-    // core.info('Successfully took screenshot.')
+    core.info('Successfully took screenshot.')
 }
 
 async function runDoomServer() {
@@ -100,7 +100,7 @@ async function commitImageToGithub (action: Action) {
     execSync('git config user.email "github-actions@github.com"');
 
     // Add and commit the screenshot
-    execSync('git add screenshots');
+    // execSync('git add screenshots');
     execSync(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
 
     // Push using GITHUB_TOKEN

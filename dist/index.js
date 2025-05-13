@@ -23876,8 +23876,22 @@ var github = __toESM(require_github());
 var import_child_process = require("child_process");
 var import_child_process2 = require("child_process");
 var import_path = __toESM(require("path"));
+var import_playwright = require("playwright");
+var import_fs = require("fs");
 var COMPLETED_COMMIT_MESSAGE = "commit-doom:";
 async function takeScreenshotOfAction(action) {
+  const url = "http://localhost:8080";
+  const screenshotPath = (0, import_path.join)(__dirname, "screenshots", "latest.png");
+  (0, import_fs.mkdirSync)((0, import_path.join)(__dirname, "screenshots"), { recursive: true });
+  const browser = await import_playwright.chromium.launch();
+  const page = await browser.newPage();
+  core.info("Running playwright against doom");
+  await page.goto(url, { waitUntil: "networkidle" });
+  core.info("Running action on puppetteer");
+  console.log(`Taking screenshot and saving to ${screenshotPath}`);
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+  await browser.close();
+  core.info("Successfully took screenshot.");
 }
 async function runDoomServer() {
   const publicDir = import_path.default.join(__dirname, "public");
@@ -23901,7 +23915,6 @@ function getActionFromCommitMessage(commitMessage) {
 async function commitImageToGithub(action) {
   (0, import_child_process.execSync)('git config user.name "github-actions"');
   (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
-  (0, import_child_process.execSync)("git add screenshots");
   (0, import_child_process.execSync)(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
   const repo = process.env.GITHUB_REPOSITORY;
   const token = process.env.GITHUB_TOKEN;
@@ -23950,3 +23963,4 @@ undici/lib/fetch/body.js:
 undici/lib/websocket/frame.js:
   (*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> *)
 */
+//# sourceMappingURL=index.js.map

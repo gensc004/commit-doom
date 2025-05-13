@@ -6,7 +6,7 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js; cp -r ./public ./dist/public;",
+    "build": "node esbuild.config.js; cp -r ./public ./dist/public;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.1"
+    "@actions/github": "^6.0.1",
+    "playwright": "^1.52.0"
   }
 }
