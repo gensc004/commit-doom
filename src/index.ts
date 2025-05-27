@@ -5,6 +5,7 @@ import { spawn } from "child_process";
 import path, { join } from "path";
 import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
+import http from 'http'
 
 const COMPLETED_COMMIT_MESSAGE = 'commit-doom:'
 
@@ -44,6 +45,25 @@ type Action = {
 //     await browser.close();
 // })();
 
+function waitForServer(url: string, timeout: number = 10000): Promise<undefined> {
+    const start = Date.now();
+
+    return new Promise((resolve, reject) => {
+        const check = () => {
+            http.get(url, res => {
+                resolve(undefined);
+            }).on("error", () => {
+                if (Date.now() - start > timeout) {
+                    reject(new Error("Timeout waiting for server"));
+                } else {
+                    setTimeout(check, 500);
+                }
+            });
+        };
+        check();
+    });
+}
+
 async function takeScreenshotOfAction (action: Action) {
     const url = 'http://localhost:8080';
     const screenshotPath = join(__dirname, 'screenshots', 'latest.png');
@@ -80,6 +100,8 @@ async function runDoomServer() {
             shell: true,
         }
     );
+
+    await waitForServer("http://localhost:8080")
 
     core.info('Running doom server on port 8080');
 
