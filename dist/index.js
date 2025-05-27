@@ -23882,7 +23882,7 @@ var import_http = __toESM(require("http"));
 var COMPLETED_COMMIT_MESSAGE = "commit-doom:";
 var DOOM_IMAGE_PATH = (0, import_path.join)(__dirname, "..", "_doom", "screenshots");
 var PUBLIC_DIR = import_path.default.join(__dirname, "public");
-function waitForServer(url, timeout = 1e4) {
+function _waitForServer(url, timeout = 1e4) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const check = () => {
@@ -23899,6 +23899,19 @@ function waitForServer(url, timeout = 1e4) {
     check();
   });
 }
+async function runDoomServer() {
+  const server = (0, import_child_process2.spawn)(
+    "npx",
+    ["http-server", PUBLIC_DIR, "-p", "8080", "--silent"],
+    {
+      stdio: "inherit",
+      shell: true
+    }
+  );
+  await _waitForServer("http://localhost:8080");
+  core.info("Running doom server on port 8080");
+  return server;
+}
 async function takeScreenshotOfAction(action) {
   const url = "http://localhost:8080";
   const screenshotPath = (0, import_path.join)(DOOM_IMAGE_PATH, "latest.png");
@@ -23912,19 +23925,6 @@ async function takeScreenshotOfAction(action) {
   await page.screenshot({ path: screenshotPath, fullPage: true });
   await browser.close();
   core.info("Successfully took screenshot.");
-}
-async function runDoomServer() {
-  const server = (0, import_child_process2.spawn)(
-    "npx",
-    ["http-server", PUBLIC_DIR, "-p", "8080", "--silent"],
-    {
-      stdio: "inherit",
-      shell: true
-    }
-  );
-  await waitForServer("http://localhost:8080");
-  core.info("Running doom server on port 8080");
-  return server;
 }
 function getActionFromCommitMessage(commitMessage) {
   return {

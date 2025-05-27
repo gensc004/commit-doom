@@ -47,7 +47,7 @@ type Action = {
 //     await browser.close();
 // })();
 
-function waitForServer(url: string, timeout: number = 10000): Promise<undefined> {
+function _waitForServer(url: string, timeout: number = 10000): Promise<undefined> {
     const start = Date.now();
 
     return new Promise((resolve, reject) => {
@@ -64,6 +64,23 @@ function waitForServer(url: string, timeout: number = 10000): Promise<undefined>
         };
         check();
     });
+}
+
+async function runDoomServer() {
+    const server = spawn(
+        "npx",
+        ["http-server", PUBLIC_DIR, "-p", "8080", "--silent"],
+        {
+            stdio: "inherit",
+            shell: true,
+        }
+    );
+
+    await _waitForServer("http://localhost:8080")
+
+    core.info('Running doom server on port 8080');
+
+    return server
 }
 
 async function takeScreenshotOfAction (action: Action) {
@@ -89,23 +106,6 @@ async function takeScreenshotOfAction (action: Action) {
     await browser.close();
 
     core.info('Successfully took screenshot.')
-}
-
-async function runDoomServer() {
-    const server = spawn(
-        "npx",
-        ["http-server", PUBLIC_DIR, "-p", "8080", "--silent"],
-        {
-            stdio: "inherit",
-            shell: true,
-        }
-    );
-
-    await waitForServer("http://localhost:8080")
-
-    core.info('Running doom server on port 8080');
-
-    return server
 }
 
 function getActionFromCommitMessage (commitMessage: string): Action | null {
