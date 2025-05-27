@@ -23899,13 +23899,13 @@ function waitForServer(url, timeout = 1e4) {
 }
 async function takeScreenshotOfAction(action) {
   const url = "http://localhost:8080";
-  const screenshotPath = (0, import_path.join)(__dirname, "screenshots", "latest.png");
+  const screenshotPath = (0, import_path.join)(__dirname, "..", "_doom", "screenshots", "latest.png");
   (0, import_fs.mkdirSync)((0, import_path.join)(__dirname, "screenshots"), { recursive: true });
   const browser = await import_playwright.chromium.launch();
   const page = await browser.newPage();
   core.info("Running playwright against doom");
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 2e4 });
-  core.info("Running action on puppetteer");
+  core.info("Running action on playwright");
   console.log(`Taking screenshot and saving to ${screenshotPath}`);
   await page.screenshot({ path: screenshotPath, fullPage: true });
   await browser.close();
@@ -23934,7 +23934,7 @@ function getActionFromCommitMessage(commitMessage) {
 async function commitImageToGithub(action) {
   (0, import_child_process.execSync)('git config user.name "github-actions"');
   (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
-  (0, import_child_process.execSync)(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
+  (0, import_child_process.execSync)(`git commit --allow-empty -a  -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
   const repo = process.env.GITHUB_REPOSITORY;
   const token = process.env.GITHUB_TOKEN;
   if (!repo || !token) {

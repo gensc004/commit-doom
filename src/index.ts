@@ -66,7 +66,7 @@ function waitForServer(url: string, timeout: number = 10000): Promise<undefined>
 
 async function takeScreenshotOfAction (action: Action) {
     const url = 'http://localhost:8080';
-    const screenshotPath = join(__dirname, 'screenshots', 'latest.png');
+    const screenshotPath = join(__dirname, '..', '_doom', 'screenshots', 'latest.png');
 
     // Ensure directory exists
     mkdirSync(join(__dirname, 'screenshots'), { recursive: true });
@@ -79,7 +79,7 @@ async function takeScreenshotOfAction (action: Action) {
 
 
     // TODO: Run commands
-    core.info('Running action on puppetteer');
+    core.info('Running action on playwright');
 
     console.log(`Taking screenshot and saving to ${screenshotPath}`);
     await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -123,7 +123,7 @@ async function commitImageToGithub (action: Action) {
 
     // Add and commit the screenshot
     // execSync('git add screenshots');
-    execSync(`git commit --allow-empty -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
+    execSync(`git commit --allow-empty -a -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
 
     // Push using GITHUB_TOKEN
     const repo = process.env.GITHUB_REPOSITORY;
