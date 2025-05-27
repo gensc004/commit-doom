@@ -23880,6 +23880,8 @@ var import_playwright = require("playwright");
 var import_fs = require("fs");
 var import_http = __toESM(require("http"));
 var COMPLETED_COMMIT_MESSAGE = "commit-doom:";
+var DOOM_IMAGE_PATH = (0, import_path.join)(__dirname, "..", "_doom", "screenshots");
+var PUBLIC_DIR = import_path.default.join(__dirname, "public");
 function waitForServer(url, timeout = 1e4) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
@@ -23899,8 +23901,8 @@ function waitForServer(url, timeout = 1e4) {
 }
 async function takeScreenshotOfAction(action) {
   const url = "http://localhost:8080";
-  const screenshotPath = (0, import_path.join)(__dirname, "..", "_doom", "screenshots", "latest.png");
-  (0, import_fs.mkdirSync)((0, import_path.join)(__dirname, "screenshots"), { recursive: true });
+  const screenshotPath = (0, import_path.join)(DOOM_IMAGE_PATH, "latest.png");
+  (0, import_fs.mkdirSync)(DOOM_IMAGE_PATH, { recursive: true });
   const browser = await import_playwright.chromium.launch();
   const page = await browser.newPage();
   core.info("Running playwright against doom");
@@ -23912,10 +23914,9 @@ async function takeScreenshotOfAction(action) {
   core.info("Successfully took screenshot.");
 }
 async function runDoomServer() {
-  const publicDir = import_path.default.join(__dirname, "public");
   const server = (0, import_child_process2.spawn)(
     "npx",
-    ["http-server", publicDir, "-p", "8080", "--silent"],
+    ["http-server", PUBLIC_DIR, "-p", "8080", "--silent"],
     {
       stdio: "inherit",
       shell: true
@@ -23934,7 +23935,8 @@ function getActionFromCommitMessage(commitMessage) {
 async function commitImageToGithub(action) {
   (0, import_child_process.execSync)('git config user.name "github-actions"');
   (0, import_child_process.execSync)('git config user.email "github-actions@github.com"');
-  (0, import_child_process.execSync)(`git commit --allow-empty -a  -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
+  (0, import_child_process.execSync)(`git add ${DOOM_IMAGE_PATH}`);
+  (0, import_child_process.execSync)(`git commit -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
   const repo = process.env.GITHUB_REPOSITORY;
   const token = process.env.GITHUB_TOKEN;
   if (!repo || !token) {

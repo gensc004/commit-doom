@@ -8,6 +8,8 @@ import { mkdirSync } from 'fs';
 import http from 'http'
 
 const COMPLETED_COMMIT_MESSAGE = 'commit-doom:'
+const DOOM_IMAGE_PATH = join(__dirname, '..', '_doom', 'screenshots');
+const PUBLIC_DIR = path.join(__dirname, "public");
 
 type Action = {
     command: string,
@@ -66,10 +68,10 @@ function waitForServer(url: string, timeout: number = 10000): Promise<undefined>
 
 async function takeScreenshotOfAction (action: Action) {
     const url = 'http://localhost:8080';
-    const screenshotPath = join(__dirname, '..', '_doom', 'screenshots', 'latest.png');
+    const screenshotPath = join(DOOM_IMAGE_PATH, 'latest.png');
 
     // Ensure directory exists
-    mkdirSync(join(__dirname, 'screenshots'), { recursive: true });
+    mkdirSync(DOOM_IMAGE_PATH, { recursive: true });
 
     const browser = await chromium.launch();
     const page = await browser.newPage();
@@ -90,11 +92,9 @@ async function takeScreenshotOfAction (action: Action) {
 }
 
 async function runDoomServer() {
-    const publicDir = path.join(__dirname, "public");
-
     const server = spawn(
         "npx",
-        ["http-server", publicDir, "-p", "8080", "--silent"],
+        ["http-server", PUBLIC_DIR, "-p", "8080", "--silent"],
         {
             stdio: "inherit",
             shell: true,
@@ -123,7 +123,8 @@ async function commitImageToGithub (action: Action) {
 
     // Add and commit the screenshot
     // execSync('git add screenshots');
-    execSync(`git commit --allow-empty -a -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
+    execSync(`git add ${DOOM_IMAGE_PATH}`)
+    execSync(`git commit -m "${COMPLETED_COMMIT_MESSAGE} ${action.command} ${action.frames}"`);
 
     // Push using GITHUB_TOKEN
     const repo = process.env.GITHUB_REPOSITORY;
