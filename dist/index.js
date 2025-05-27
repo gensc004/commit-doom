@@ -296,7 +296,7 @@ var require_tunnel = __commonJS({
     "use strict";
     var net = require("net");
     var tls = require("tls");
-    var http = require("http");
+    var http2 = require("http");
     var https = require("https");
     var events = require("events");
     var assert = require("assert");
@@ -307,12 +307,12 @@ var require_tunnel = __commonJS({
     exports2.httpsOverHttps = httpsOverHttps;
     function httpOverHttp(options) {
       var agent = new TunnelingAgent(options);
-      agent.request = http.request;
+      agent.request = http2.request;
       return agent;
     }
     function httpsOverHttp(options) {
       var agent = new TunnelingAgent(options);
-      agent.request = http.request;
+      agent.request = http2.request;
       agent.createSocket = createSecureSocket;
       agent.defaultPort = 443;
       return agent;
@@ -333,7 +333,7 @@ var require_tunnel = __commonJS({
       var self = this;
       self.options = options || {};
       self.proxyOptions = self.options.proxy || {};
-      self.maxSockets = self.options.maxSockets || http.Agent.defaultMaxSockets;
+      self.maxSockets = self.options.maxSockets || http2.Agent.defaultMaxSockets;
       self.requests = [];
       self.sockets = [];
       self.on("free", function onFree(socket, host, port, localAddress) {
@@ -6864,7 +6864,7 @@ var require_client = __commonJS({
     "use strict";
     var assert = require("assert");
     var net = require("net");
-    var http = require("http");
+    var http2 = require("http");
     var { pipeline } = require("stream");
     var util = require_util();
     var timers = require_timers();
@@ -6937,11 +6937,11 @@ var require_client = __commonJS({
       kHTTP2CopyHeaders,
       kHTTP1BuildRequest
     } = require_symbols();
-    var http2;
+    var http22;
     try {
-      http2 = require("http2");
+      http22 = require("http2");
     } catch {
-      http2 = { constants: {} };
+      http22 = { constants: {} };
     }
     var {
       constants: {
@@ -6953,7 +6953,7 @@ var require_client = __commonJS({
         HTTP2_HEADER_EXPECT,
         HTTP2_HEADER_STATUS
       }
-    } = http2;
+    } = http22;
     var h2ExperimentalWarned = false;
     var FastBuffer = Buffer[Symbol.species];
     var kClosedResolve = Symbol("kClosedResolve");
@@ -7086,7 +7086,7 @@ var require_client = __commonJS({
         this[kConnector] = connect2;
         this[kSocket] = null;
         this[kPipelining] = pipelining != null ? pipelining : 1;
-        this[kMaxHeadersSize] = maxHeaderSize || http.maxHeaderSize;
+        this[kMaxHeadersSize] = maxHeaderSize || http2.maxHeaderSize;
         this[kKeepAliveDefaultTimeout] = keepAliveTimeout == null ? 4e3 : keepAliveTimeout;
         this[kKeepAliveMaxTimeout] = keepAliveMaxTimeout == null ? 6e5 : keepAliveMaxTimeout;
         this[kKeepAliveTimeoutThreshold] = keepAliveTimeoutThreshold == null ? 1e3 : keepAliveTimeoutThreshold;
@@ -7794,7 +7794,7 @@ var require_client = __commonJS({
               code: "UNDICI-H2"
             });
           }
-          const session = http2.connect(client[kUrl], {
+          const session = http22.connect(client[kUrl], {
             createConnection: () => socket,
             peerMaxConcurrentStreams: client[kHTTP2SessionState].maxConcurrentStreams
           });
@@ -17344,7 +17344,7 @@ var require_lib = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.HttpClient = exports2.isHttps = exports2.HttpClientResponse = exports2.HttpClientError = exports2.getProxyUrl = exports2.MediaTypes = exports2.Headers = exports2.HttpCodes = void 0;
-    var http = __importStar(require("http"));
+    var http2 = __importStar(require("http"));
     var https = __importStar(require("https"));
     var pm = __importStar(require_proxy());
     var tunnel = __importStar(require_tunnel2());
@@ -17736,7 +17736,7 @@ var require_lib = __commonJS({
         const info2 = {};
         info2.parsedUrl = requestUrl;
         const usingSsl = info2.parsedUrl.protocol === "https:";
-        info2.httpModule = usingSsl ? https : http;
+        info2.httpModule = usingSsl ? https : http2;
         const defaultPort = usingSsl ? 443 : 80;
         info2.options = {};
         info2.options.host = info2.parsedUrl.hostname;
@@ -17784,7 +17784,7 @@ var require_lib = __commonJS({
         const usingSsl = parsedUrl.protocol === "https:";
         let maxSockets = 100;
         if (this.requestOptions) {
-          maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+          maxSockets = this.requestOptions.maxSockets || http2.globalAgent.maxSockets;
         }
         if (proxyUrl && proxyUrl.hostname) {
           const agentOptions = {
@@ -17806,7 +17806,7 @@ var require_lib = __commonJS({
         }
         if (!agent) {
           const options = { keepAlive: this._keepAlive, maxSockets };
-          agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+          agent = usingSsl ? new https.Agent(options) : new http2.Agent(options);
           this._agent = agent;
         }
         if (usingSsl && this._ignoreSslError) {
@@ -23878,7 +23878,25 @@ var import_child_process2 = require("child_process");
 var import_path = __toESM(require("path"));
 var import_playwright = require("playwright");
 var import_fs = require("fs");
+var import_http = __toESM(require("http"));
 var COMPLETED_COMMIT_MESSAGE = "commit-doom:";
+function waitForServer(url, timeout = 1e4) {
+  const start = Date.now();
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      import_http.default.get(url, (res) => {
+        resolve(void 0);
+      }).on("error", () => {
+        if (Date.now() - start > timeout) {
+          reject(new Error("Timeout waiting for server"));
+        } else {
+          setTimeout(check, 500);
+        }
+      });
+    };
+    check();
+  });
+}
 async function takeScreenshotOfAction(action) {
   const url = "http://localhost:8080";
   const screenshotPath = (0, import_path.join)(__dirname, "screenshots", "latest.png");
@@ -23886,7 +23904,7 @@ async function takeScreenshotOfAction(action) {
   const browser = await import_playwright.chromium.launch();
   const page = await browser.newPage();
   core.info("Running playwright against doom");
-  await page.goto(url, { waitUntil: "networkidle" });
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 2e4 });
   core.info("Running action on puppetteer");
   console.log(`Taking screenshot and saving to ${screenshotPath}`);
   await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -23903,6 +23921,7 @@ async function runDoomServer() {
       shell: true
     }
   );
+  await waitForServer("http://localhost:8080");
   core.info("Running doom server on port 8080");
   return server;
 }
